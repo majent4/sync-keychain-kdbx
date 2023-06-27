@@ -5,9 +5,10 @@ import (
     "os"
     "syscall"
     "fmt"
+    "github.com/keybase/go-keychain"
 )
 
-func my_exec(cmd_array []string) error {
+func myExec(cmd_array []string) error {
     cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
 
     cmd.Stdin = os.Stdin
@@ -20,11 +21,31 @@ func my_exec(cmd_array []string) error {
 }
 
 func main() {
-    cmd := []string{"keepassxc-cli", "db-info", "Password.kdbx"}
+//    cmd := []string{"keepassxc-cli", "db-info", "Password.kdbx"}
 
-    err := my_exec(cmd)
+//    err := myExec(cmd)
+//    if err != nil {
+//        fmt.Println("Error:", err)
+//        return
+//    }
+
+    service := ""
+    account := ""
+    accessGroup := ""
+
+    query := keychain.NewItem()
+    query.SetSecClass(keychain.SecClassGenericPassword)
+    query.SetService(service)
+    query.SetAccount(account)
+    query.SetAccessGroup(accessGroup)
+    query.SetMatchLimit(keychain.MatchLimitAll)
+    query.SetReturnAttributes(true)
+    results, err := keychain.QueryItem(query)
     if err != nil {
-        fmt.Println("Error:", err)
-        return
+        // Error
+    } else {
+        for _, r := range results {
+            fmt.Printf("%#v\n", r)
+        }
     }
 }
